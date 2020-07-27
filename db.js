@@ -1,9 +1,11 @@
 import mongoose from "mongoose";
-
-mongoose.connect("mongodb://localhost:27017/wetube", 
+import dotenv from "dotenv";
+dotenv.config()
+mongoose.connect(process.env.MONGO_URL, 
     {
         useNewUrlParser: true,
-        useFindAndModify:false
+        useFindAndModify:false,
+        useUnifiedTopology:true
     }
 );
 
