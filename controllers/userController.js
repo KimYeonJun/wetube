@@ -5,7 +5,6 @@ export const getJoin = (req, res) => {
   res.render("join", { pageTitle: "Join" });
 };
 export const postJoin = async (req, res, next) => {
-  console.log(req.body);
   const {
     body: { name, email, password, password2 },
   } = req;
@@ -36,16 +35,20 @@ export const postLogin = passport.authenticate("local", {
   successRedirect: routes.home,
 });
 
+//Github
+
 export const githubLogin = passport.authenticate("github");
 
 export const githubLoginCallback = async (_, __, profile, cb) => {
   const {
-    _json: { id, avata_url, name, email },
+    _json: { id, avatar_url: avatarUrl, name, email },
   } = profile;
   try {
     const user = await User.findOne({ email });
     if (user) {
       user.githubId = id;
+      user.avataUrl = avatarUrl;
+      user.name = name;
       user.save();
       return cb(null, user);
     }
@@ -53,7 +56,7 @@ export const githubLoginCallback = async (_, __, profile, cb) => {
       email,
       name,
       githubId: id,
-      avataUrl: avata_url,
+      avatarUrl,
     });
     return cb(null, newUser);
   } catch (error) {
@@ -65,14 +68,79 @@ export const postGithubLogin = (req, res) => {
   res.redirect(routes.home);
 };
 
+//Facebook
+
+export const facebookLogin = passport.authenticate("facebook");
+
+export const facebookLoginCallback = (
+  accessToken,
+  refreshToken,
+  profile,
+  cb
+) => {
+  console.log(accessToken, refreshToken, profile, cb);
+};
+
+export const postFacebookLogin = (req, res) => {
+  res.redirect(routes.home);
+};
+
+//Google
+
+export const googleLogin = passport.authenticate("google", {
+  scope: ["profile", "email"],
+});
+
+export const googleLoginCallback = async (_, __, profile, cb) => {
+  const {
+    _json: { sub: id, picture: avatarUrl, name, email },
+  } = profile;
+  try {
+    const user = await User.findOne({ email });
+    if (user) {
+      user.googleId = id;
+      user.avatarUrl = avatarUrl;
+      user.save();
+      return cb(null, user);
+    }
+    const newUser = await User.create({
+      email,
+      name,
+      googleId: id,
+      avatarUrl,
+    });
+    return cb(null, newUser);
+  } catch (error) {
+    return cb(error);
+  }
+};
+
+export const postGoogleLogin = (req, res) => {
+  res.redirect(routes.home);
+};
+
 export const logout = (req, res) => {
   req.logout();
   res.redirect(routes.home);
 };
+
+export const getMe = (req, res) => {
+  res.render("userDetail", { pageTitle: "User Detail", user: req.user });
+};
+
 export const users = (req, res) => res.render("users", { pageTitle: "Users" });
 export const editProfile = (req, res) =>
   res.render("editProfile", { pageTitle: "Edit Profile" });
 export const changePassword = (req, res) =>
   res.render("changePassword", { pageTitle: "Change Password" });
-export const userDetail = (req, res) =>
-  res.render("userDetail", { pageTitle: "User Detail" });
+export const userDetail = async (req, res) => {
+  const {
+    params: { id },
+  } = req;
+  try {
+    const user = await User.findById(id);
+    res.render("userDetail", { pageTitle: "User Detail", user });
+  } catch (error) {
+    res.redirect(routes.home);
+  }
+};
