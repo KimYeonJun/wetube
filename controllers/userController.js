@@ -175,9 +175,10 @@ export const userDetail = async (req, res) => {
   const {
     params: { id },
   } = req;
-  console.log(req.params);
   try {
-    const user = await User.findById(id);
+    const user = await User.findById(id).populate("videos");
+    user.avatarUrl = `../${user.avatarUrl}`;
+    console.log(user);
     res.render("userDetail", { pageTitle: "User Detail", user });
   } catch (error) {
     res.redirect(routes.home);
