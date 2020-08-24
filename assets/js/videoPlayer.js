@@ -9,7 +9,9 @@ const volumeRange = document.getElementById("jsVolume");
 
 const registerView = () => {
   const videoID = window.location.href.split("/videos/")[1];
-  fetch(`/api/${videoID}/view`);
+  fetch(`/api/${videoID}/view`, {
+    method: "POST",
+  });
 };
 
 const handlePlayClick = () => {
