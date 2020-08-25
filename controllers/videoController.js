@@ -129,11 +129,10 @@ export const postRegisterView = async (req, res) => {
 
 export const postAddComment = async (req, res) => {
   const {
-    param: { id },
+    params: { id },
     body: { comment },
     user,
   } = req;
-
   try {
     const video = await Video.findById(id);
     const newComment = await Comment.create({
@@ -141,6 +140,7 @@ export const postAddComment = async (req, res) => {
       creator: user.id,
     });
     video.comments.push(newComment.id);
+    video.save();
   } catch (error) {
     res.status(400);
   } finally {
